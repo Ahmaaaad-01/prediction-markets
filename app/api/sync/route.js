@@ -3,7 +3,7 @@ import { upsertEvent } from '@/lib/db';
 
 export async function POST() {
   try {
-    const markets = await fetchKalshiMarkets(50);
+    const { markets, pagesScanned } = await fetchKalshiMarkets(50);
     const now = new Date().toISOString();
 
     for (const m of markets) {
@@ -18,7 +18,7 @@ export async function POST() {
       });
     }
 
-    return Response.json({ synced: markets.length });
+    return Response.json({ synced: markets.length, pagesScanned });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
   }
