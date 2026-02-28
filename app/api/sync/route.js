@@ -1,4 +1,4 @@
-import { fetchKalshiMarkets } from '@/lib/kalshi';
+import { fetchKalshiMarkets, categoryFromEventTicker } from '@/lib/kalshi';
 import { upsertEvent } from '@/lib/db';
 
 export async function POST() {
@@ -13,7 +13,7 @@ export async function POST() {
         yes_ask: m.yes_ask ?? null,
         no_ask: m.no_ask ?? null,
         close_time: m.close_time ?? null,
-        category: m.category ?? null,
+        category: categoryFromEventTicker(m.event_ticker) ?? m.category ?? null,
         synced_at: now,
       });
     }
