@@ -32,7 +32,9 @@ export default function ActionBar() {
       const res = await fetch('/api/score', { method: 'POST' });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      setStatus(`Scored ${data.scored} events.`);
+      const fresh = data.alreadyFresh ? ` · ${data.alreadyFresh} already fresh` : '';
+      const skipped = data.skipped ? ` · ${data.skipped} timed out` : '';
+      setStatus(`Scored ${data.scored} of ${data.total} events${fresh}${skipped}.`);
       router.refresh();
     } catch (err) {
       setStatus(`Scoring failed: ${err.message}`);
