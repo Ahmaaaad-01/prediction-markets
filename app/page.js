@@ -1,15 +1,11 @@
 import { getEventsWithScores } from '@/lib/db';
 import ActionBar from '@/app/components/ActionBar';
 
-/** Strip leading "yes " / "no " from Kalshi titles and capitalise first letter. */
 function cleanTitle(title) {
   if (!title) return title;
   return title.replace(/^(yes|no)\s+/i, '').replace(/^./, (c) => c.toUpperCase());
 }
 
-/** Pull a readable sport/category label from the ticker.
- *  Kalshi tickers look like: KXNBA-25FEB28-MEM-ORL-TOT-OV219 or NBA-LEBRON-PTS-2025...
- *  We just grab the first segment as the category tag if it's short enough. */
 function categoryFromTicker(ticker, category) {
   if (category) return category;
   const first = ticker?.split('-')[0] ?? '';
@@ -36,16 +32,6 @@ function ValueBadge({ score }) {
   );
 }
 
-function SentimentBadge({ sentiment }) {
-  if (!sentiment) return <span className="text-zinc-400">—</span>;
-  const colors = { bullish: 'text-green-700', bearish: 'text-red-600', neutral: 'text-zinc-500' };
-  return (
-    <span className={`text-xs font-medium capitalize ${colors[sentiment] ?? ''}`}>
-      {sentiment}
-    </span>
-  );
-}
-
 function CategoryTag({ label }) {
   if (!label) return null;
   return (
@@ -60,7 +46,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-10">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
 
         <div className="flex items-start justify-between">
           <div>
@@ -84,8 +70,7 @@ export default function Home() {
                   <th className="px-4 py-3 text-left">Event</th>
                   <th className="px-4 py-3 text-right">YES</th>
                   <th className="px-4 py-3 text-right">NO</th>
-                  <th className="px-4 py-3 text-center">Sentiment</th>
-                  <th className="px-4 py-3 text-center">Confidence</th>
+                  <th className="px-4 py-3 text-left">AI Reasoning</th>
                   <th className="px-4 py-3 text-center">Value Score</th>
                 </tr>
               </thead>
@@ -95,7 +80,7 @@ export default function Home() {
                   const closeDate = formatCloseDate(e.close_time);
                   return (
                     <tr key={e.ticker} className="hover:bg-zinc-50 transition-colors">
-                      <td className="px-4 py-3 max-w-sm">
+                      <td className="px-4 py-3 w-72">
                         <div className="flex items-start gap-1 flex-wrap">
                           <CategoryTag label={cat} />
                           <span className="font-medium text-zinc-900 line-clamp-2">
@@ -108,23 +93,20 @@ export default function Home() {
                             <span className="text-[10px] text-zinc-400">closes {closeDate}</span>
                           )}
                         </div>
-                        {e.reasoning && (
-                          <div className="text-xs text-zinc-400 mt-0.5 line-clamp-1 italic">{e.reasoning}</div>
-                        )}
                       </td>
-                      <td className="px-4 py-3 text-right text-zinc-700">
+                      <td className="px-4 py-3 text-right text-zinc-700 whitespace-nowrap">
                         {e.yes_ask != null ? `${e.yes_ask}¢` : '—'}
                       </td>
-                      <td className="px-4 py-3 text-right text-zinc-700">
+                      <td className="px-4 py-3 text-right text-zinc-700 whitespace-nowrap">
                         {e.no_ask != null ? `${e.no_ask}¢` : '—'}
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        <SentimentBadge sentiment={e.sentiment} />
+                      <td className="px-4 py-3 text-zinc-600 text-xs max-w-md">
+                        {e.reasoning
+                          ? <span>{e.reasoning}</span>
+                          : <span className="text-zinc-300">Not scored yet</span>
+                        }
                       </td>
-                      <td className="px-4 py-3 text-center text-zinc-600">
-                        {e.confidence != null ? `${e.confidence}%` : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-3 text-center whitespace-nowrap">
                         <ValueBadge score={e.value_score} />
                       </td>
                     </tr>
